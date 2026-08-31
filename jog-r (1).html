@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jog R</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asphalt: #1b1a18;
+    --panel: #242220;
+    --panel-2: #2c2925;
+    --rivet: #3a362f;
+    --steel: #94897a;
+    --steel-dim: #625b4f;
+    --rust: #c1601f;
+    --rust-light: #e2812f;
+    --paper: #ece5d8;
+    --paper-dim: #b9b1a2;
+    --danger: #b23a2e;
+    --amber: #b8862f;
+    --ok: #5c7a53;
+    --line: rgba(236,229,216,0.1);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--asphalt);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(236,229,216,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+  }
+  .wrap{ max-width: 880px; margin: 0 auto; padding: 48px 24px 0; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--line); flex-wrap: wrap;
+  }
+  .hero h1{
+    font-family:'Oswald', sans-serif; font-weight:700;
+    font-size: clamp(48px, 9vw, 96px); letter-spacing: 0.5px; line-height: 0.9;
+    margin:0; color: var(--paper);
+  }
+  .hero h1 span{ color: var(--rust); }
+  .hero p.tagline{ margin: 14px 0 0; color: var(--paper-dim); font-size: 16px; max-width: 46ch; }
+
+  .plate{
+    background: linear-gradient(180deg, #3d3a35, #2b2925);
+    border: 1px solid var(--rivet); border-radius: 4px; padding: 16px 18px;
+    min-width: 220px; position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 16px rgba(0,0,0,0.35);
+  }
+  .plate::before, .plate::after, .plate .rivet-tr, .plate .rivet-bl{
+    content:""; position:absolute; width:6px; height:6px; border-radius:50%;
+    background: radial-gradient(circle at 35% 35%, #8c8578, #47433b);
+  }
+  .plate::before{ top:6px; left:6px; }
+  .plate .rivet-tr{ top:6px; right:6px; }
+  .plate::after{ bottom:6px; left:6px; }
+  .plate .rivet-bl{ bottom:6px; right:6px; }
+  .plate-row{ display:flex; justify-content:space-between; gap: 14px; padding: 4px 0; font-family:'JetBrains Mono', monospace; font-size: 12px; }
+  .plate-row + .plate-row{ border-top: 1px dashed rgba(236,229,216,0.12); }
+  .plate-row .k{ color: var(--steel); letter-spacing: 0.03em; }
+  .plate-row .v{ color: var(--paper); outline:none; text-align:right; min-width: 70px; }
+  .plate-row .v:focus{ color: var(--rust-light); }
+  .plate-title{ font-family:'Oswald', sans-serif; font-size: 13px; letter-spacing: 0.08em; color: var(--rust-light); margin: 0 0 8px; }
+
+  /* ---------- DASHBOARD STRIP ---------- */
+  .dash{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 24px;
+  }
+  .dash-cell{
+    background: var(--asphalt);
+    padding: 14px 16px;
+  }
+  .dash-cell .num{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 24px;
+    color: var(--rust-light);
+    display:block;
+  }
+  .dash-cell .lbl{
+    font-size: 12px;
+    color: var(--steel);
+  }
+  @media (max-width: 620px){
+    .dash{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding: 44px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap: 16px; margin-bottom: 22px; flex-wrap:wrap; }
+  .section-head h2{ font-family:'Oswald', sans-serif; font-weight:600; font-size: 26px; margin:0; color: var(--paper); }
+  .section-sub{ margin: -14px 0 22px; color: var(--paper-dim); font-size: 14px; max-width: 56ch; }
+  .section-note{ color: var(--steel); font-size: 13px; font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- OPSÆTNING (table) ---------- */
+  .setup-row{ display:grid; grid-template-columns: 1fr 1.4fr 28px; gap: 10px; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .setup-row input{ background:transparent; border:none; color: var(--paper); font-family:'Inter', sans-serif; font-size: 15px; padding: 4px 2px; border-bottom: 1px solid transparent; width:100%; }
+  .setup-row input:first-child{ font-weight:600; }
+  .setup-row input::placeholder{ color: var(--steel-dim); }
+  .setup-row input:focus{ outline:none; border-bottom-color: var(--rust); }
+  .setup-row input:nth-child(2){ color: var(--paper-dim); }
+
+  /* ---------- SKAL FIKSES (checklist) ---------- */
+  .fix-row{ display:flex; align-items:center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .fix-check{ flex: 0 0 20px; width:20px; height:20px; border-radius: 3px; border: 1.5px solid var(--steel-dim); cursor:pointer; background: transparent; display:flex; align-items:center; justify-content:center; transition: background 0.15s, border-color 0.15s; }
+  .fix-check.done{ background: var(--ok); border-color: var(--ok); }
+  .fix-check.done::after{ content:"✓"; color: var(--asphalt); font-size: 13px; font-weight:700; }
+  .fix-row input.fix-text{ flex:1; background:transparent; border:none; color: var(--paper); font-size: 15px; padding: 4px 2px; }
+  .fix-row input.fix-text:focus{ outline:none; }
+  .fix-row.done input.fix-text{ color: var(--steel-dim); text-decoration: line-through; }
+  .tag{ font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.03em; padding: 3px 8px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; flex: 0 0 auto; }
+  .tag[data-p="akut"]{ color: var(--danger); border-color: var(--danger); }
+  .tag[data-p="snart"]{ color: var(--amber); border-color: var(--amber); }
+  .tag[data-p="kan-vente"]{ color: var(--steel); border-color: var(--steel-dim); }
+
+  /* ---------- ØNSKELISTE (cards) ---------- */
+  .wish-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .wish-card{ background: var(--panel); border: 1px solid var(--rivet); border-radius: 4px; padding: 16px; position:relative; }
+  .wish-card input.w-name{ background:transparent; border:none; font-family:'Oswald', sans-serif; font-size: 17px; color: var(--paper); width: 85%; padding: 0 0 6px; }
+  .wish-card input.w-name:focus{ outline:none; }
+  .wish-card input.w-price{ background:transparent; border:none; font-family:'JetBrains Mono', monospace; color: var(--rust-light); font-size: 15px; width: 100%; padding: 0 0 8px; }
+  .wish-card input.w-price:focus{ outline:none; }
+  .wish-card textarea.w-note{ background:transparent; border:none; border-top: 1px dashed var(--line); color: var(--paper-dim); font-size: 13px; width:100%; resize:none; padding-top: 8px; font-family:'Inter', sans-serif; min-height: 40px; }
+  .wish-card textarea.w-note:focus{ outline:none; }
+  .wish-total{ font-family:'JetBrains Mono', monospace; color: var(--rust-light); font-size: 14px; }
+
+  /* ---------- SERVICE / KM ---------- */
+  .km-grid{ display:flex; gap: 28px; flex-wrap: wrap; align-items:flex-end; margin-bottom: 20px; }
+  .km-field{ display:flex; flex-direction:column; gap: 6px; }
+  .km-field label{ font-size: 12px; color: var(--steel); font-family:'JetBrains Mono', monospace; letter-spacing:0.03em; }
+  .km-field input{
+    background: var(--panel); border: 1px solid var(--rivet); border-radius: 3px;
+    color: var(--paper); font-family:'JetBrains Mono', monospace; font-size: 16px;
+    padding: 8px 10px; width: 130px;
+  }
+  .km-field input:focus{ outline:none; border-color: var(--rust); }
+  .km-bar-wrap{ margin-top: 6px; }
+  .km-bar-track{ background: var(--panel); border: 1px solid var(--rivet); border-radius: 3px; height: 10px; overflow:hidden; }
+  .km-bar-fill{ height:100%; background: var(--ok); transition: width 0.3s ease, background 0.3s ease; }
+  .km-bar-fill.warn{ background: var(--amber); }
+  .km-bar-fill.over{ background: var(--danger); }
+  .km-status{ margin-top: 8px; font-size: 13px; color: var(--paper-dim); }
+  .km-status strong{ color: var(--paper); }
+
+  /* ---------- BENZIN/OLIE ---------- */
+  .mix-panel{ background: var(--panel); border: 1px solid var(--rivet); border-radius: 4px; padding: 22px; display:flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+  .mix-inputs{ display:flex; gap: 20px; flex-wrap: wrap; }
+  .mix-field label{ display:block; font-size: 12px; color: var(--steel); font-family:'JetBrains Mono', monospace; margin-bottom: 6px; }
+  .mix-field input{ background: var(--asphalt); border: 1px solid var(--rivet); border-radius: 3px; color: var(--paper); font-family:'JetBrains Mono', monospace; font-size: 16px; padding: 8px 10px; width: 100px; }
+  .mix-field input:focus{ outline:none; border-color: var(--rust); }
+  .ratio-presets{ display:flex; gap: 6px; margin-top: 8px; }
+  .ratio-btn{ background:none; border: 1px solid var(--steel-dim); color: var(--steel); font-family:'JetBrains Mono', monospace; font-size: 12px; padding: 4px 8px; border-radius: 3px; cursor:pointer; }
+  .ratio-btn.active{ border-color: var(--rust); color: var(--rust-light); }
+  .mix-result{ font-family:'Oswald', sans-serif; }
+  .mix-result .big{ font-size: 40px; color: var(--rust-light); line-height: 1; }
+  .mix-result .small{ font-size: 13px; color: var(--steel); font-family:'Inter', sans-serif; }
+
+  /* ---------- KØREVEJR ---------- */
+  .weather-panel{ background: var(--panel); border: 1px solid var(--rivet); border-radius: 4px; padding: 22px; }
+  .weather-loc{ display:flex; align-items:center; gap: 10px; margin-bottom: 16px; flex-wrap:wrap; }
+  .loc-btn{ background:none; border: 1px dashed var(--steel-dim); color: var(--steel); font-size: 13px; padding: 6px 12px; border-radius: 3px; cursor:pointer; }
+  .loc-btn:hover{ border-color: var(--rust); color: var(--rust-light); }
+  .weather-body{ display:flex; gap: 32px; flex-wrap: wrap; align-items:center; }
+  .weather-stats{ display:flex; gap: 28px; flex-wrap: wrap; }
+  .weather-stat .num{ font-family:'JetBrains Mono', monospace; font-size: 26px; color: var(--paper); }
+  .weather-stat .lbl{ font-size: 12px; color: var(--steel); }
+  .verdict{
+    font-family:'Oswald', sans-serif; font-size: 16px; padding: 8px 14px; border-radius: 3px;
+    border: 1px solid var(--ok); color: var(--ok); display:inline-block;
+  }
+  .verdict.warn{ border-color: var(--amber); color: var(--amber); }
+  .verdict.bad{ border-color: var(--danger); color: var(--danger); }
+  .weather-empty{ color: var(--steel-dim); font-size: 14px; }
+
+  /* ---------- shared bits ---------- */
+  .del-btn{ background:none; border:none; color: var(--steel-dim); cursor:pointer; font-size: 16px; line-height:1; padding: 4px; }
+  .del-btn:hover{ color: var(--danger); }
+  .wish-card .del-btn{ position:absolute; top:10px; right:10px; }
+  .add-btn{
+    display:inline-flex; align-items:center; gap: 6px; background:none;
+    border: 1px dashed var(--steel-dim); color: var(--steel); font-family:'Inter', sans-serif;
+    font-size: 13px; padding: 8px 14px; border-radius: 3px; cursor:pointer; margin-top: 16px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-btn:hover{ border-color: var(--rust); color: var(--rust-light); }
+  .empty{ color: var(--steel-dim); font-size: 14px; font-style: italic; padding: 10px 0; }
+
+  footer{ max-width: 880px; margin: 0 auto; padding: 24px 24px 0; color: var(--steel-dim); font-size: 12px; font-family:'JetBrains Mono', monospace; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div>
+      <h1>JOG<span>R</span></h1>
+      <p class="tagline">Opsætning, ting der skal fikses, og ting jeg drømmer om at købe til den.</p>
+    </div>
+    <div class="plate">
+      <div class="rivet-tr"></div><div class="rivet-bl"></div>
+      <p class="plate-title">TYPESKILT</p>
+      <div class="plate-row"><span class="k">MODEL</span><span class="v" contenteditable="true" data-key="model">Peugeot Jog R</span></div>
+      <div class="plate-row"><span class="k">ÅRGANG</span><span class="v" contenteditable="true" data-key="year">—</span></div>
+      <div class="plate-row"><span class="k">MOTOR</span><span class="v" contenteditable="true" data-key="engine">50cc 2-takt</span></div>
+      <div class="plate-row"><span class="k">TOPFART</span><span class="v" contenteditable="true" data-key="topspeed">—</span></div>
+    </div>
+  </div>
+
+  <div class="dash" id="dashboard">
+    <div class="dash-cell"><span class="num" id="dash-setup">0</span><span class="lbl">dele monteret</span></div>
+    <div class="dash-cell"><span class="num" id="dash-fixes">0</span><span class="lbl">opgaver åbne</span></div>
+    <div class="dash-cell"><span class="num" id="dash-wish">0 kr</span><span class="lbl">ønskeliste i alt</span></div>
+    <div class="dash-cell"><span class="num" id="dash-km">— km</span><span class="lbl">siden service</span></div>
+  </div>
+
+  <section id="setup-section">
+    <div class="section-head">
+      <h2>Opsætning</h2>
+      <span class="section-note" id="setup-count">0 dele</span>
+    </div>
+    <div id="setup-list"></div>
+    <button class="add-btn" id="add-setup">+ tilføj del</button>
+  </section>
+
+  <section id="fix-section">
+    <div class="section-head">
+      <h2>Skal fikses</h2>
+      <span class="section-note" id="fix-count">0 opgaver</span>
+    </div>
+    <div id="fix-list"></div>
+    <button class="add-btn" id="add-fix">+ tilføj opgave</button>
+  </section>
+
+  <section id="km-section">
+    <div class="section-head"><h2>Kilometerstand &amp; service</h2></div>
+    <p class="section-sub">Skriv km-standen når du kører, så holder siden styr på hvor længe siden det er du skiftede olie/tjekkede den.</p>
+    <div class="km-grid">
+      <div class="km-field">
+        <label>KM NU</label>
+        <input type="number" id="km-current" inputmode="numeric" placeholder="0">
+      </div>
+      <div class="km-field">
+        <label>SIDST SERVICERET VED</label>
+        <input type="number" id="km-last-service" inputmode="numeric" placeholder="0">
+      </div>
+      <div class="km-field">
+        <label>SERVICEINTERVAL</label>
+        <input type="number" id="km-interval" inputmode="numeric" placeholder="1000">
+      </div>
+    </div>
+    <div class="km-bar-wrap">
+      <div class="km-bar-track"><div class="km-bar-fill" id="km-bar" style="width:0%"></div></div>
+      <p class="km-status" id="km-status">Udfyld felterne for at se status.</p>
+    </div>
+  </section>
+
+  <section id="mix-section">
+    <div class="section-head"><h2>Benzin/olie-blanding</h2></div>
+    <p class="section-sub">Din Jog R kører 2% — det er 20 ml 2-taktsolie for hver liter benzin. Skriv literne, og se hvor meget olie du skal hælde op til.</p>
+    <div class="mix-panel">
+      <div class="mix-field">
+        <label>LITER BENZIN</label>
+        <input type="number" id="mix-liters" step="0.1" placeholder="5" autocomplete="off">
+      </div>
+      <div class="mix-result">
+        <span class="big" id="mix-output">0 ml</span>
+        <div class="small">olie — hæld op til her</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="wish-section">
+    <div class="section-head">
+      <h2>Ønskeliste</h2>
+      <span class="wish-total" id="wish-total">0 kr i alt</span>
+    </div>
+    <div class="wish-grid" id="wish-list"></div>
+    <button class="add-btn" id="add-wish">+ tilføj ønske</button>
+  </section>
+
+  <section id="weather-section">
+    <div class="section-head"><h2>Kørevejr</h2></div>
+    <p class="section-sub">Tjek om det er værd at trille ud lige nu.</p>
+    <div class="weather-panel">
+      <div class="weather-loc">
+        <button class="loc-btn" id="weather-btn">Tjek vejret ved min placering</button>
+      </div>
+      <div id="weather-body"><p class="weather-empty">Tryk på knappen for at hente vejret.</p></div>
+    </div>
+  </section>
+
+</div>
+
+<footer><span id="save-status">—</span></footer>
+
+<script>
+(function(){
+  /* ============================================================
+     OPSÆTNING — udfyld disse 4 ting, så gemmer siden i din egen
+     GitHub-repo i stedet for i Claude.
+
+     1) owner  → dit GitHub-brugernavn
+     2) repo   → navnet på en repo du har oprettet (må gerne være PRIVAT)
+     3) path   → filnavnet data gemmes i, fx "jogr-data.json"
+        (filen behøver ikke findes i forvejen — den oprettes selv)
+     4) token  → en Personal Access Token med kun adgang til denne
+        ene repo (Settings → Developer settings → Fine-grained tokens
+        → vælg kun denne repo → Permissions: Contents = Read and write)
+
+     OBS: hvis siden ligger på en OFFENTLIG GitHub Pages, kan alle der
+     ser sidens kildekode se din token. Brug derfor helst en PRIVAT
+     repo/Pages, eller en token du er indstillet på at udskifte.
+  ============================================================ */
+  const CONFIG = {
+    owner:  'DIT-BRUGERNAVN',
+    repo:   'DIT-REPO-NAVN',
+    path:   'jogr-data.json',
+    branch: 'main',
+    token:  'DIN-GITHUB-TOKEN'
+  };
+
+  const configured = CONFIG.owner !== 'DIT-BRUGERNAVN'
+    && CONFIG.repo !== 'DIT-REPO-NAVN'
+    && CONFIG.token !== 'DIN-GITHUB-TOKEN';
+
+  let state = {
+    plate: { model: 'Peugeot Jog R', year: '—', engine: '50cc 2-takt', topspeed: '—' },
+    setup: [],
+    fixes: [],
+    wish: [],
+    km: { current: '', lastService: '', interval: '1000' },
+    mix: { liters: '' }
+  };
+
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  let currentSha = null;
+
+  function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+  function b64ToUtf8(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g, '')))); }
+
+  function apiUrl(){
+    return `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+  }
+  function apiHeaders(){
+    return { Authorization: `Bearer ${CONFIG.token}`, Accept: 'application/vnd.github+json' };
+  }
+
+  async function githubGet(){
+    const res = await fetch(`${apiUrl()}?ref=${CONFIG.branch}`, { headers: apiHeaders() });
+    if(res.status === 404) return null;
+    if(!res.ok) throw new Error('GitHub svarede ' + res.status);
+    const data = await res.json();
+    currentSha = data.sha;
+    return JSON.parse(b64ToUtf8(data.content));
+  }
+
+  async function githubPut(obj){
+    const body = {
+      message: 'Opdater Jog R data',
+      content: utf8ToB64(JSON.stringify(obj, null, 2)),
+      branch: CONFIG.branch
+    };
+    if(currentSha) body.sha = currentSha;
+    const res = await fetch(apiUrl(), { method: 'PUT', headers: apiHeaders(), body: JSON.stringify(body) });
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      throw new Error('GitHub svarede ' + res.status + ' — ' + (err.message || 'ukendt fejl'));
+    }
+    const data = await res.json();
+    currentSha = data.content.sha;
+  }
+
+  function setStatus(text, isError){
+    const el = document.getElementById('save-status');
+    if(!el) return;
+    el.textContent = text;
+    el.style.color = isError ? 'var(--danger)' : 'var(--steel-dim)';
+  }
+
+  async function load(){
+    if(!configured){
+      setStatus('ikke sat op endnu — udfyld CONFIG i koden', true);
+      renderAll();
+      return;
+    }
+    setStatus('henter fra GitHub…');
+    try{
+      const parsed = await githubGet();
+      if(parsed){
+        state = Object.assign(state, parsed);
+        state.km = Object.assign({ current:'', lastService:'', interval:'1000' }, parsed.km);
+        state.mix = Object.assign({ liters:'' }, parsed.mix);
+        setStatus('hentet fra GitHub');
+      }else{
+        state.setup = [
+          { id: uid(), name: 'Polini variator', note: 'monteret' },
+          { id: uid(), name: 'Malossi udstødning', note: 'monteret' }
+        ];
+        state.fixes = [
+          { id: uid(), text: 'Bremsekabel strammes', priority: 'snart', done: false }
+        ];
+        state.wish = [
+          { id: uid(), name: 'Nyt sæde', price: '450', note: 'Original er revnet' }
+        ];
+        await githubPut(state);
+        setStatus('oprettet i GitHub');
+      }
+    }catch(e){
+      console.error(e);
+      setStatus('kunne ikke hente: ' + e.message, true);
+    }
+    renderAll();
+  }
+
+  let saveTimer = null;
+  function save(){
+    if(!configured) return;
+    clearTimeout(saveTimer);
+    setStatus('gemmer…');
+    saveTimer = setTimeout(async () => {
+      try{
+        await githubPut(state);
+        const now = new Date();
+        setStatus('gemt kl. ' + now.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' }));
+      }catch(e){
+        console.error(e);
+        setStatus('kunne ikke gemme: ' + e.message, true);
+      }
+    }, 600);
+  }
+
+  function renderAll(){
+    renderPlate();
+    renderSetup();
+    renderFixes();
+    renderWish();
+    renderKm();
+    renderMix();
+    updateDashboard();
+  }
+
+  /* ---------- PLATE ---------- */
+  function renderPlate(){
+    document.querySelectorAll('.plate-row .v').forEach(el => {
+      const key = el.dataset.key;
+      el.textContent = state.plate[key] || '—';
+      el.addEventListener('blur', () => {
+        state.plate[key] = el.textContent.trim() || '—';
+        save();
+      });
+    });
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  function updateDashboard(){
+    document.getElementById('dash-setup').textContent = state.setup.length;
+    document.getElementById('dash-fixes').textContent = state.fixes.filter(f => !f.done).length;
+    const wishTotal = state.wish.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
+    document.getElementById('dash-wish').textContent = wishTotal.toLocaleString('da-DK') + ' kr';
+    const cur = parseFloat(state.km.current);
+    const last = parseFloat(state.km.lastService);
+    const dashKm = document.getElementById('dash-km');
+    dashKm.textContent = (!isNaN(cur) && !isNaN(last) && cur >= last) ? (cur - last).toLocaleString('da-DK') + ' km' : '— km';
+  }
+
+  /* ---------- OPSÆTNING ---------- */
+  function renderSetup(){
+    const list = document.getElementById('setup-list');
+    list.innerHTML = '';
+    if(state.setup.length === 0){ list.innerHTML = '<p class="empty">Ingen dele tilføjet endnu.</p>'; }
+    state.setup.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'setup-row';
+      row.innerHTML = `
+        <input class="s-name" placeholder="Del (fx variator)" value="${escapeAttr(item.name)}">
+        <input class="s-note" placeholder="Note (fx mærke, dato)" value="${escapeAttr(item.note)}">
+        <button class="del-btn" title="Fjern">×</button>
+      `;
+      const [nameInp, noteInp] = row.querySelectorAll('input');
+      nameInp.addEventListener('input', () => { item.name = nameInp.value; save(); });
+      noteInp.addEventListener('input', () => { item.note = noteInp.value; save(); });
+      row.querySelector('.del-btn').addEventListener('click', () => {
+        state.setup = state.setup.filter(i => i.id !== item.id);
+        renderSetup(); updateDashboard(); save();
+      });
+      list.appendChild(row);
+    });
+    document.getElementById('setup-count').textContent = state.setup.length + (state.setup.length === 1 ? ' del' : ' dele');
+    updateDashboard();
+  }
+
+  document.getElementById('add-setup').addEventListener('click', () => {
+    state.setup.push({ id: uid(), name: '', note: '' });
+    renderSetup(); save();
+    const inputs = document.querySelectorAll('#setup-list .s-name');
+    if(inputs.length) inputs[inputs.length - 1].focus();
+  });
+
+  /* ---------- FIXES ---------- */
+  function renderFixes(){
+    const list = document.getElementById('fix-list');
+    list.innerHTML = '';
+    if(state.fixes.length === 0){ list.innerHTML = '<p class="empty">Ingen opgaver — godt gået.</p>'; }
+    state.fixes.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'fix-row' + (item.done ? ' done' : '');
+      row.innerHTML = `
+        <button class="fix-check ${item.done ? 'done' : ''}"></button>
+        <input class="fix-text" placeholder="Hvad skal fikses?" value="${escapeAttr(item.text)}">
+        <span class="tag" data-p="${item.priority}">${priorityLabel(item.priority)}</span>
+        <button class="del-btn" title="Fjern">×</button>
+      `;
+      row.querySelector('.fix-check').addEventListener('click', () => {
+        item.done = !item.done;
+        renderFixes(); updateDashboard(); save();
+      });
+      const textInp = row.querySelector('.fix-text');
+      textInp.addEventListener('input', () => { item.text = textInp.value; save(); });
+      row.querySelector('.tag').addEventListener('click', () => {
+        const order = ['akut', 'snart', 'kan-vente'];
+        item.priority = order[(order.indexOf(item.priority) + 1) % order.length];
+        renderFixes(); save();
+      });
+      row.querySelector('.del-btn').addEventListener('click', () => {
+        state.fixes = state.fixes.filter(i => i.id !== item.id);
+        renderFixes(); updateDashboard(); save();
+      });
+      list.appendChild(row);
+    });
+    const open = state.fixes.filter(i => !i.done).length;
+    document.getElementById('fix-count').textContent = open + (open === 1 ? ' opgave' : ' opgaver');
+    updateDashboard();
+  }
+
+  function priorityLabel(p){
+    return { 'akut': 'akut', 'snart': 'snart', 'kan-vente': 'kan vente' }[p] || 'kan vente';
+  }
+
+  document.getElementById('add-fix').addEventListener('click', () => {
+    state.fixes.push({ id: uid(), text: '', priority: 'snart', done: false });
+    renderFixes(); save();
+    const inputs = document.querySelectorAll('#fix-list .fix-text');
+    if(inputs.length) inputs[inputs.length - 1].focus();
+  });
+
+  /* ---------- WISHLIST ---------- */
+  function renderWish(){
+    const list = document.getElementById('wish-list');
+    list.innerHTML = '';
+    state.wish.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'wish-card';
+      card.innerHTML = `
+        <button class="del-btn" title="Fjern">×</button>
+        <input class="w-name" placeholder="Fx nyt sæde" value="${escapeAttr(item.name)}">
+        <input class="w-price" placeholder="Pris (kr)" value="${escapeAttr(item.price)}">
+        <textarea class="w-note" placeholder="Note...">${escapeHtml(item.note)}</textarea>
+      `;
+      card.querySelector('.w-name').addEventListener('input', e => { item.name = e.target.value; save(); });
+      card.querySelector('.w-price').addEventListener('input', e => { item.price = e.target.value.replace(/[^0-9.]/g, ''); renderWishTotal(); updateDashboard(); save(); });
+      card.querySelector('.w-note').addEventListener('input', e => { item.note = e.target.value; save(); });
+      card.querySelector('.del-btn').addEventListener('click', () => {
+        state.wish = state.wish.filter(i => i.id !== item.id);
+        renderWish(); updateDashboard(); save();
+      });
+      list.appendChild(card);
+    });
+    renderWishTotal();
+  }
+
+  function renderWishTotal(){
+    const total = state.wish.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+    document.getElementById('wish-total').textContent = total.toLocaleString('da-DK') + ' kr i alt';
+  }
+
+  document.getElementById('add-wish').addEventListener('click', () => {
+    state.wish.push({ id: uid(), name: '', price: '', note: '' });
+    renderWish(); save();
+    const inputs = document.querySelectorAll('#wish-list .w-name');
+    if(inputs.length) inputs[inputs.length - 1].focus();
+  });
+
+  /* ---------- KM / SERVICE ---------- */
+  const kmCurrentInp = document.getElementById('km-current');
+  const kmLastInp = document.getElementById('km-last-service');
+  const kmIntervalInp = document.getElementById('km-interval');
+
+  function renderKm(){
+    kmCurrentInp.value = state.km.current;
+    kmLastInp.value = state.km.lastService;
+    kmIntervalInp.value = state.km.interval;
+    updateKmStatus();
+  }
+
+  function updateKmStatus(){
+    const cur = parseFloat(state.km.current);
+    const last = parseFloat(state.km.lastService);
+    const interval = parseFloat(state.km.interval) || 1000;
+    const bar = document.getElementById('km-bar');
+    const status = document.getElementById('km-status');
+
+    if(isNaN(cur) || isNaN(last) || cur < last){
+      bar.style.width = '0%';
+      bar.className = 'km-bar-fill';
+      status.textContent = 'Udfyld km-nu og sidst-serviceret for at se status.';
+      updateDashboard();
+      return;
+    }
+    const since = cur - last;
+    const pct = Math.min(100, (since / interval) * 100);
+    bar.style.width = pct + '%';
+    bar.className = 'km-bar-fill' + (pct >= 100 ? ' over' : pct >= 75 ? ' warn' : '');
+
+    if(pct >= 100){
+      status.textContent = `${since.toLocaleString('da-DK')} km siden sidste service — over intervallet på ${interval.toLocaleString('da-DK')} km. Tid til service.`;
+    }else{
+      const remaining = interval - since;
+      status.innerHTML = `<strong>${since.toLocaleString('da-DK')} km</strong> siden sidste service. Cirka ${remaining.toLocaleString('da-DK')} km til næste.`;
+    }
+    updateDashboard();
+  }
+
+  kmCurrentInp.addEventListener('input', () => { state.km.current = kmCurrentInp.value; updateKmStatus(); save(); });
+  kmLastInp.addEventListener('input', () => { state.km.lastService = kmLastInp.value; updateKmStatus(); save(); });
+  kmIntervalInp.addEventListener('input', () => { state.km.interval = kmIntervalInp.value || '1000'; updateKmStatus(); save(); });
+
+  /* ---------- BENZIN/OLIE ---------- */
+  const mixLitersInp = document.getElementById('mix-liters');
+  const mixOutput = document.getElementById('mix-output');
+  const ML_PER_LITER = 20; // Jog R: 2% = 1:50 = 20 ml olie pr. liter benzin
+
+  function renderMix(){
+    mixLitersInp.value = state.mix.liters;
+    updateMixOutput();
+  }
+
+  function updateMixOutput(){
+    const liters = parseFloat(state.mix.liters) || 0;
+    const ml = liters * ML_PER_LITER;
+    mixOutput.textContent = Math.round(ml).toLocaleString('da-DK') + ' ml';
+  }
+
+  mixLitersInp.addEventListener('input', () => { state.mix.liters = mixLitersInp.value; updateMixOutput(); save(); });
+
+  /* ---------- KØREVEJR ---------- */
+  document.getElementById('weather-btn').addEventListener('click', () => {
+    const body = document.getElementById('weather-body');
+    if(!navigator.geolocation){
+      body.innerHTML = '<p class="weather-empty">Din browser understøtter ikke geolokation.</p>';
+      return;
+    }
+    body.innerHTML = '<p class="weather-empty">Henter placering og vejr…</p>';
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      try{
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,precipitation,weather_code&wind_speed_unit=ms`;
+        const res = await fetch(url);
+        const data = await res.json();
+        renderWeather(data.current);
+      }catch(e){
+        body.innerHTML = '<p class="weather-empty">Kunne ikke hente vejret lige nu. Prøv igen om lidt.</p>';
+      }
+    }, () => {
+      body.innerHTML = '<p class="weather-empty">Kunne ikke få din placering — tjek at siden har lov til det.</p>';
+    });
+  });
+
+  function renderWeather(cur){
+    const body = document.getElementById('weather-body');
+    if(!cur){
+      body.innerHTML = '<p class="weather-empty">Ingen data lige nu.</p>';
+      return;
+    }
+    const temp = Math.round(cur.temperature_2m);
+    const wind = Math.round(cur.wind_speed_10m);
+    const rain = cur.precipitation || 0;
+
+    let verdictClass = 'ok', verdictText = 'Godt kørevejr';
+    if(rain > 0.2 || wind > 12 || temp < 3){
+      verdictClass = 'bad'; verdictText = 'Bliv hjemme — tag bilen i dag';
+    }else if(wind > 8 || temp < 8 || rain > 0){
+      verdictClass = 'warn'; verdictText = 'Kan lade sig gøre — pak varmt/regntøj';
+    }
+
+    body.innerHTML = `
+      <div class="weather-stats">
+        <div class="weather-stat"><span class="num">${temp}°</span><span class="lbl">temperatur</span></div>
+        <div class="weather-stat"><span class="num">${wind} m/s</span><span class="lbl">vind</span></div>
+        <div class="weather-stat"><span class="num">${rain} mm</span><span class="lbl">nedbør nu</span></div>
+      </div>
+      <span class="verdict ${verdictClass === 'ok' ? '' : verdictClass}">${verdictText}</span>
+    `;
+  }
+
+  function escapeAttr(str){ return String(str || '').replace(/"/g, '&quot;'); }
+  function escapeHtml(str){ return String(str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  load();
+})();
+</script>
+
+</body>
+</html>
